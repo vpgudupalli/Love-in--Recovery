@@ -62,3 +62,12 @@
 
 .claimPhoto { display:block; width:100%; max-width:420px; max-height:420px; object-fit:cover; border-radius:18px; margin:14px 0 8px; }
 .claimItem + .claimItem { border-top:1px solid rgba(32,28,25,.1); margin-top:22px; padding-top:22px; }
+
+.assessmentChoiceGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-top:26px; }
+.assessmentChoice { text-align:left; border:1px solid rgba(32,28,25,.12); background:#fff; border-radius:22px; padding:24px; cursor:pointer; display:grid; gap:12px; font:inherit; }
+.assessmentChoice strong { font-size:1.3rem; }
+.assessmentChoice span { line-height:1.5; opacity:.75; }
+.assessmentChoice b { margin-top:8px; }
+.assessmentBack { margin:18px 0; }
+.standaloneAssessment { max-width:850px; }
+@media (max-width:700px) { .assessmentChoiceGrid { grid-template-columns:1fr; } }
