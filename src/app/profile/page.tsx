@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import AppNav from "@/components/AppNav";
 import { Plus, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -15,6 +16,7 @@ export default function ProfilePage(){
  const [profile,setProfile]=useState<Form>(blank),[draft,setDraft]=useState<Form>(blank);
  const [editing,setEditing]=useState(false),[loading,setLoading]=useState(true),[notice,setNotice]=useState("");
  const [photos,setPhotos]=useState<string[]>([]),[uploading,setUploading]=useState(false);
+ const [assessmentLatest,setAssessmentLatest]=useState<Record<string,{label:string;date:string}>>({});
 
  useEffect(()=>{(async()=>{
   const {data:{user}}=await supabase.auth.getUser();
@@ -25,6 +27,8 @@ export default function ProfilePage(){
   else setNotice("Complete onboarding to create your profile.");
   const {data:photoRows}=await supabase.from("profile_photos").select("id,storage_path,position").eq("user_id",user.id).order("position");
   if(photoRows){const urls=photoRows.map((p:any)=>supabase.storage.from("profile-photos").getPublicUrl(p.storage_path).data.publicUrl);setPhotos(urls);}
+  const {data:results}=await supabase.from("assessment_results").select("assessment_type,result_label,completed_at").eq("user_id",user.id).order("completed_at",{ascending:false});
+  if(results){const latest:Record<string,{label:string;date:string}>={}; for(const r of results as any[]){if(!latest[r.assessment_type])latest[r.assessment_type]={label:r.result_label||"Completed",date:r.completed_at};} setAssessmentLatest(latest);}
   setLoading(false);
  })()},[supabase]);
 
@@ -57,7 +61,8 @@ export default function ProfilePage(){
   if(error)return setNotice(error.message);
   setProfile(draft);setEditing(false);setNotice("Profile changes saved to your account.");
  }
- if(loading)return <main><AppNav/><section className="appPage narrow"><p>Loading profile...</p></section></main>;
+ if(loading)return <main><AppNav/><section className="appPage narrow"><p>Loading profile...</p><div className="profileAssessments"><div className="profileAssessmentHeader"><div><div className="eyebrow">Relationship style</div><h2>Your assessments</h2><p>Your newest result is shown here. Previous results remain saved in your assessment history.</p></div><Link className="secondaryButton" href="/assessments">Take or retake assessments</Link></div><div className="profileAssessmentGrid"><div className="profileAssessmentCard"><strong>Attachment Style</strong>{assessmentLatest.attachment?<><span className="completedBadge">Completed</span><h3>{assessmentLatest.attachment.label}</h3><small>Latest: {new Date(assessmentLatest.attachment.date).toLocaleDateString()}</small></>:<><span className="notCompletedBadge">Not completed</span><p>Take the assessment to add your latest relationship-style result.</p></>}</div><div className="profileAssessmentCard"><strong>Enneagram-style</strong>{assessmentLatest.enneagram?<><span className="completedBadge">Completed</span><h3>{assessmentLatest.enneagram.label}</h3><small>Latest: {new Date(assessmentLatest.enneagram.date).toLocaleDateString()}</small></>:<><span className="notCompletedBadge">Not completed</span><p>Take the assessment to add your latest personality theme.</p></>}</div></div></div>
+ </section></main>;
  return <main><AppNav/><section className="appPage narrow">
   <div className="profileTitleRow"><div><div className="eyebrow">Profile</div><h1>{editing?"Edit profile":"Profile preview"}</h1></div>{!editing&&<button className="primaryButton" onClick={()=>{setDraft(profile);setEditing(true)}}>Edit profile</button>}</div>
   {notice&&<div className="saveNotice">{notice}</div>}
