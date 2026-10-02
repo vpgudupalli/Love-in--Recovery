@@ -27,7 +27,7 @@ export default function ProfilePage(){
   if(data){const v={name:data.first_name||"",birthDate:data.birth_date||"",city:data.city||"",region:data.region||"",bio:data.bio||"",relationshipGoal:data.relationship_goal||"Long-term relationship"};setProfile(v);setDraft(v);setUseAssessments(Boolean(data.use_assessments_for_matching));setAssessmentVisibility(data.assessment_visibility||"private");}
   else setNotice("Complete onboarding to create your profile.");
   const {data:photoRows}=await supabase.from("profile_photos").select("id,storage_path,position").eq("user_id",user.id).order("position");
-  if(photoRows){const urls=photoRows.map((p:any)=>supabase.storage.from("profile-photos").getPublicUrl(p.storage_path).data.publicUrl);setPhotos(urls);}
+  if(photoRows){const urls:string[]=[];for(const p of photoRows as any[]){const {data:signed}=await supabase.storage.from("profile-photos").createSignedUrl(p.storage_path,3600);if(signed?.signedUrl)urls.push(signed.signedUrl);}setPhotos(urls);}
   const {data:results}=await supabase.from("assessment_results").select("assessment_type,result_label,completed_at").eq("user_id",user.id).order("completed_at",{ascending:false});
   if(results){const latest:Record<string,{label:string;date:string}>={}; for(const r of results as any[]){if(!latest[r.assessment_type])latest[r.assessment_type]={label:r.result_label||"Completed",date:r.completed_at};} setAssessmentLatest(latest);}
   setLoading(false);
@@ -45,7 +45,7 @@ export default function ProfilePage(){
   if(upErr){setUploading(false);return setNotice(upErr.message);}
   const {error:dbErr}=await supabase.from("profile_photos").insert({user_id:user.id,storage_path:path,position:photos.length});
   if(dbErr){await supabase.storage.from("profile-photos").remove([path]);setUploading(false);return setNotice(dbErr.message);}
-  const url=supabase.storage.from("profile-photos").getPublicUrl(path).data.publicUrl; setPhotos(v=>[...v,url]);setUploading(false);setNotice("Photo added.");
+  const {data:signed}=await supabase.storage.from("profile-photos").createSignedUrl(path,3600);if(signed?.signedUrl)setPhotos(v=>[...v,signed.signedUrl]);setUploading(false);setNotice("Photo added.");
  }
  async function removePhoto(index:number){
   const {data:{user}}=await supabase.auth.getUser(); if(!user)return;
