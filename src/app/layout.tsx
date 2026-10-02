@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Recovery in Love",
+  title: "Love in Recovery",
   description: "Dating built around recovery, self-awareness, and relationship compatibility.",
 };
 
