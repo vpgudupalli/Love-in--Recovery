@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
 type Likert = 1 | 2 | 3 | 4 | 5;
@@ -118,14 +120,37 @@ function Assessment({ questions, answers, setAnswers, resultLabel }: {
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(0);
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
   const [ageConfirmed, setAgeConfirmed] = useState(false);
-  const [stepAnswers, setStepAnswers] = useState<Record<number, string>>({});
+  const [form, setForm] = useState({ firstName:"", birthDate:"", city:"", region:"", relationshipGoal:"Long-term relationship", recoveryPreference:"Sober partner preferred", mentalHealthVisibility:"private", recoveryVisibility:"matches" });
+  const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState("");
   const [attachmentAnswers, setAttachmentAnswers] = useState<Answers>({});
   const [enneagramAnswers, setEnneagramAnswers] = useState<Answers>({});
   const current = steps[step];
   const attachmentComplete = Object.keys(attachmentAnswers).length === attachmentQuestions.length;
   const enneagramComplete = Object.keys(enneagramAnswers).length === enneagramQuestions.length;
-  const canContinue = step === 0 ? ageConfirmed : step === 6 ? attachmentComplete : step === 7 ? enneagramComplete : true;
+  const age = form.birthDate ? (() => { const b=new Date(form.birthDate+"T00:00:00"),t=new Date(); let a=t.getFullYear()-b.getFullYear(); if(t.getMonth()<b.getMonth()||(t.getMonth()===b.getMonth()&&t.getDate()<b.getDate()))a--; return a; })() : 0;
+  const basicComplete = !!form.firstName.trim() && !!form.birthDate && age >= 18;
+  const canContinue = step === 0 ? ageConfirmed : step === 1 ? basicComplete : step === 6 ? attachmentComplete : step === 7 ? enneagramComplete : true;
+
+  const updateForm = (key: keyof typeof form, value: string) => setForm(v => ({...v,[key]:value}));
+
+  async function finishOnboarding() {
+    setSaving(true); setNotice("");
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setSaving(false); setNotice("Please sign in again before finishing your profile."); return; }
+    const { error: profileError } = await supabase.from("profiles").upsert({ id:user.id, first_name:form.firstName.trim(), birth_date:form.birthDate, city:form.city.trim()||null, region:form.region.trim()||null, relationship_goal:form.relationshipGoal, updated_at:new Date().toISOString() });
+    if (profileError) { setSaving(false); setNotice(profileError.message); return; }
+    const { error: recoveryError } = await supabase.from("recovery_profiles").upsert({ user_id:user.id, wants_sober_partner:form.recoveryPreference==="Sober partner preferred", wants_partner_in_recovery:form.recoveryPreference==="Someone in recovery", visibility:form.recoveryVisibility, updated_at:new Date().toISOString() });
+    if (recoveryError) { setSaving(false); setNotice(recoveryError.message); return; }
+    await supabase.from("mental_health_profiles").upsert({ user_id:user.id, visibility:form.mentalHealthVisibility, updated_at:new Date().toISOString() });
+    const ar=score(attachmentQuestions,attachmentAnswers), er=score(enneagramQuestions,enneagramAnswers);
+    await supabase.from("assessment_results").upsert({ user_id:user.id, assessment_type:"attachment", provider:"Recovery in Love original self-reflection", provider_version:"1", result_label:ar[0]?attachmentNames[ar[0][0]]:null, result_json:{answers:attachmentAnswers,ranking:ar}, completed_at:new Date().toISOString() },{onConflict:"user_id,assessment_type,provider"});
+    await supabase.from("assessment_results").upsert({ user_id:user.id, assessment_type:"enneagram-style", provider:"Recovery in Love original self-reflection", provider_version:"1", result_label:er[0]?typeNames[er[0][0]]:null, result_json:{answers:enneagramAnswers,ranking:er}, completed_at:new Date().toISOString() },{onConflict:"user_id,assessment_type,provider"});
+    setSaving(false); router.push("/discover");
+  }
 
   return (
     <main className="onboardingShell">
@@ -142,20 +167,19 @@ export default function OnboardingPage() {
           <Assessment questions={enneagramQuestions} answers={enneagramAnswers} setAnswers={setEnneagramAnswers} resultLabel={(key) => typeNames[key]} />
         ) : (
           <div className="onboardingField">
-            <label>{current.field}</label>
-            {step === 0 ? (
-              <label className="checkRow"><input type="checkbox" checked={ageConfirmed} onChange={(e) => setAgeConfirmed(e.target.checked)} /> Yes, I am 18+</label>
-            ) : (
-              <input
-                key={step}
-                value={stepAnswers[step] ?? ""}
-                onChange={(e) => setStepAnswers((answers) => ({ ...answers, [step]: e.target.value }))}
-                placeholder={current.field}
-                autoComplete="off"
-              />
-            )}
+            {step === 0 && <label className="checkRow"><input type="checkbox" checked={ageConfirmed} onChange={(e) => setAgeConfirmed(e.target.checked)} /> Yes, I am 18+</label>}
+            {step === 1 && <div className="editGrid"><label>First name<input value={form.firstName} onChange={e=>updateForm("firstName",e.target.value)} /></label><label>Date of birth<input type="date" value={form.birthDate} onChange={e=>updateForm("birthDate",e.target.value)} /></label><label>City<input value={form.city} onChange={e=>updateForm("city",e.target.value)} /></label><label>State / region<input value={form.region} onChange={e=>updateForm("region",e.target.value)} /></label>{form.birthDate && age < 18 && <p className="fullField saveNotice">You must be 18 or older.</p>}</div>}
+            {step === 2 && <label>Relationship goal<select value={form.relationshipGoal} onChange={e=>updateForm("relationshipGoal",e.target.value)}><option>Long-term relationship</option><option>Dating with intention</option><option>Open to exploring</option><option>Friendship first</option></select></label>}
+            {step === 3 && <label>Partner recovery preference<select value={form.recoveryPreference} onChange={e=>updateForm("recoveryPreference",e.target.value)}><option>Sober partner preferred</option><option>Someone in recovery</option><option>Someone who understands recovery</option><option>Open / depends on the person</option></select></label>}
+            {step === 4 && <p className="saveNotice">Relationship goal selected: {form.relationshipGoal}. You can change it later from Edit Profile.</p>}
+            {step === 5 && <label>Mental-health information visibility<select value={form.mentalHealthVisibility} onChange={e=>updateForm("mentalHealthVisibility",e.target.value)}><option value="private">Private</option><option value="matches">Matches only</option></select></label>}
+            {step === 8 && <p className="saveNotice">Your assessment results will support future compatibility explanations without being treated as a clinical prediction.</p>}
+            {step === 9 && <label>Recovery information visibility<select value={form.recoveryVisibility} onChange={e=>updateForm("recoveryVisibility",e.target.value)}><option value="private">Private</option><option value="matches">Matches only</option><option value="everyone">Everyone</option></select></label>}
+            {step === 10 && <p className="saveNotice">Photo verification is not required in this build yet. You can continue.</p>}
+            {step === 11 && <div className="settingsCard"><div className="settingRow"><span>Name</span><strong>{form.firstName}</strong></div><div className="settingRow"><span>Location</span><strong>{[form.city,form.region].filter(Boolean).join(", ")||"Not shared"}</strong></div><div className="settingRow"><span>Relationship goal</span><strong>{form.relationshipGoal}</strong></div><div className="settingRow"><span>Recovery preference</span><strong>{form.recoveryPreference}</strong></div></div>}
           </div>
         )}
+        {notice && <div className="saveNotice">{notice}</div>}
 
         <div className="onboardingActions">
           <button className="secondaryButton" disabled={step === 0} onClick={() => setStep((s) => Math.max(0, s - 1))}>Back</button>
@@ -164,7 +188,7 @@ export default function OnboardingPage() {
               {step === 6 || step === 7 ? (canContinue ? "Save result & continue" : "Answer all questions") : "Continue"}
             </button>
           ) : (
-            <Link className="primaryButton" href="/discover">Start matching</Link>
+            <button className="primaryButton" disabled={saving || !basicComplete || !attachmentComplete || !enneagramComplete} onClick={finishOnboarding}>{saving ? "Saving..." : "Save profile & start matching"}</button>
           )}
         </div>
       </section>
