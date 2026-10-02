@@ -41,3 +41,21 @@
   .editActions { flex-direction:column-reverse; }
   .editActions button { width:100%; }
 }
+
+
+/* Claim My Person */
+.claimSafety, .claimStatusCard { margin:22px 0; padding:22px; border:1px solid rgba(32,28,25,.12); border-radius:20px; background:#fff; }
+.claimSafety p, .claimStatusCard p { line-height:1.55; margin-bottom:0; }
+.claimConsent { display:flex; gap:10px; align-items:flex-start; margin:20px 0; line-height:1.45; }
+.claimConsent input { margin-top:4px; }
+.claimFile { font-size:.9rem; opacity:.7; }
+.claimBadge { display:inline-block; margin-bottom:10px; padding:7px 11px; border-radius:999px; background:#f3ebe4; font-size:.78rem; font-weight:700; }
+.claimActions { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+.claimFinePrint { font-size:.9rem; opacity:.72; }
+.claimInfoGrid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:22px; }
+.claimInfoGrid div { display:grid; gap:6px; padding:16px; border-radius:16px; background:#f7f3ef; }
+.claimInfoGrid span { font-size:.9rem; line-height:1.4; opacity:.75; }
+@media (max-width:640px) {
+  .claimInfoGrid { grid-template-columns:1fr; }
+  .claimActions { flex-direction:column; }
+}
