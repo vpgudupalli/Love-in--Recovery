@@ -115,7 +115,7 @@ export default function ClaimMyPersonPage() {
           <h2>Start a private request</h2>
           <label className="fullField">Choose your person
             <select value={partnerId} onChange={e => setPartnerId(e.target.value)}>
-              <option value="">Select a Recovery in Love member</option>
+              <option value="">Select a Love in Recovery member</option>
               {profiles.map(p => <option key={p.id} value={p.id}>{p.first_name}{p.city ? ` · ${p.city}` : ""}</option>)}
             </select>
           </label>
