@@ -21,3 +21,23 @@
   .assessmentQuestion { padding: 14px; }
   .likertRow { gap: 6px; }
 }
+
+
+/* Editable profile */
+.profileTitleRow { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; margin-bottom:20px; }
+.profileTitleRow h1 { margin-bottom:0; }
+.saveNotice { margin:12px 0 18px; padding:12px 16px; border-radius:14px; background:#edf5ed; }
+.editProfileCard { background:#fff; border:1px solid rgba(32,28,25,.12); border-radius:22px; padding:22px; }
+.editGrid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.editGrid label { display:grid; gap:8px; font-weight:600; }
+.editGrid input, .editGrid textarea, .editGrid select { width:100%; box-sizing:border-box; border:1px solid rgba(32,28,25,.2); border-radius:12px; padding:12px 14px; background:#fff; color:inherit; font:inherit; font-weight:400; }
+.editGrid textarea { resize:vertical; }
+.fullField { grid-column:1 / -1; }
+.editActions { display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
+@media (max-width:640px) {
+  .profileTitleRow { align-items:flex-start; flex-direction:column; }
+  .editGrid { grid-template-columns:1fr; }
+  .fullField { grid-column:auto; }
+  .editActions { flex-direction:column-reverse; }
+  .editActions button { width:100%; }
+}
