@@ -1,7 +1,7 @@
-# Recovery in Love — Product Specification
+# Love in Recovery — Product Specification
 
 ## Product definition
-Recovery in Love is an adults-only dating platform for people who want relationships compatible with their recovery, lifestyle, and relationship goals.
+Love in Recovery is an adults-only dating platform for people who want relationships compatible with their recovery, lifestyle, and relationship goals.
 
 Users can optionally explore attachment and personality characteristics, control what sensitive information is shared, receive compatibility-based recommendations, connect through mutual matching, and use built-in reporting, verification, and Trust & Safety tools.
 
