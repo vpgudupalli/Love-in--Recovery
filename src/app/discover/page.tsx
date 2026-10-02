@@ -47,10 +47,10 @@ export default function DiscoverPage() {
           const ids = members.map(p => p.id);
           const { data: photoRows } = await supabase.from("profile_photos").select("user_id,storage_path,position").in("user_id", ids).order("position");
           const grouped: Record<string,string[]> = {};
-          (photoRows || []).forEach((row:any) => {
-            const url = supabase.storage.from("profile-photos").getPublicUrl(row.storage_path).data.publicUrl;
-            grouped[row.user_id] = [...(grouped[row.user_id] || []), url];
-          });
+          for (const row of (photoRows || []) as any[]) {
+            const { data: signed } = await supabase.storage.from("profile-photos").createSignedUrl(row.storage_path, 3600);
+            if (signed?.signedUrl) grouped[row.user_id] = [...(grouped[row.user_id] || []), signed.signedUrl];
+          }
           setPhotos(grouped);
         }
       }
