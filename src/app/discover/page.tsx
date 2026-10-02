@@ -57,7 +57,16 @@ export default function DiscoverPage() {
     loadProfiles();
   }, [supabase]);
 
-  async function passProfile(id:string){ setProfiles(v=>v.filter(p=>p.id!==id)); }
+  async function passProfile(id:string){
+    setActing(id); setNotice("");
+    const {data:{user}}=await supabase.auth.getUser();
+    if(!user){setActing(null);return setNotice("Please sign in.");}
+    const {error}=await supabase.from("passes").upsert({from_user_id:user.id,to_user_id:id},{onConflict:"from_user_id,to_user_id"});
+    setActing(null);
+    if(error){setNotice(error.message);return;}
+    setProfiles(v=>v.filter(p=>p.id!==id));
+    setNotice("Passed. This profile will stay out of your Discover feed.");
+  }
   async function likeProfile(id:string){ setActing(id); setNotice(""); const {data,error}=await supabase.rpc("like_profile",{target_user_id:id}); setActing(null); if(error){setNotice(error.message);return;} setProfiles(v=>v.filter(p=>p.id!==id)); if(data?.matched) setNotice("It’s a match! Open Matches to start a conversation."); else setNotice("Like sent."); }
 
   return (
@@ -102,7 +111,7 @@ export default function DiscoverPage() {
                 </div>
                 <p className="profileAbout">{profile.bio || "This member has not added an About Me yet."}</p>
                 {photos[profile.id]?.length > 1 && <div className="discoverPhotoGallery">{photos[profile.id].slice(1).map((url,i)=><img key={url} src={url} alt={profile.first_name + " profile photo " + (i+2)} />)}</div>}
-                <div className="discoverActions"><button type="button" className="passButton" onClick={()=>passProfile(profile.id)}><X size={24}/> Pass</button><button type="button" className="likeButton" disabled={acting===profile.id} onClick={()=>likeProfile(profile.id)}><Heart size={24}/> {acting===profile.id?"Sending...":"Like"}</button></div>
+                <div className="discoverActions"><button type="button" className="passButton" disabled={acting===profile.id} onClick={()=>passProfile(profile.id)}><X size={24}/> Pass</button><button type="button" className="likeButton" disabled={acting===profile.id} onClick={()=>likeProfile(profile.id)}><Heart size={24}/> {acting===profile.id?"Sending...":"Like"}</button></div>
                 <div className="whyBox">
                   <strong>Profile information</strong>
                   <p>This is a real member profile from Recovery in Love. Recovery, assessment, and mental-health details are not exposed here unless their privacy settings allow it.</p>
