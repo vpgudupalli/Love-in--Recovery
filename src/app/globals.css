@@ -101,3 +101,15 @@
 .discoverPhotoGallery { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:18px 0; }
 .discoverPhotoGallery img { width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:16px; display:block; }
 .discoverPhotoGallery img:last-child:nth-child(odd) { grid-column:1/-1; aspect-ratio:16/10; }
+
+/* Assessment/profile readability */
+.profileAssessments{margin-top:28px;padding:24px;border:1px solid var(--border);border-radius:24px;background:#fff}
+.profileAssessmentHeader{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+.profileAssessmentGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}
+.profileAssessmentCard{padding:18px;border:1px solid var(--border);border-radius:18px}
+.profileAssessmentCard h3{margin:10px 0 4px}
+.completedBadge,.notCompletedBadge{display:inline-block;margin-left:10px;padding:5px 9px;border-radius:999px;font-size:.78rem;font-weight:700;background:#eee8e1;color:#2b2724}
+.notCompletedBadge{opacity:.72}
+.assessmentSaveNotice{font-weight:700}
+.compatibilityBand .pill,.compatibilityBand .pills span,.compatibilityBand span.pill{color:#2b2724!important}
+@media(max-width:700px){.profileAssessmentHeader{display:block}.profileAssessmentHeader .secondaryButton{display:inline-block;margin-top:12px}.profileAssessmentGrid{grid-template-columns:1fr}}
