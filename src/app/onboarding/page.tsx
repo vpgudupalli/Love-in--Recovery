@@ -65,7 +65,7 @@ const attachmentNames: Record<string, string> = {
 };
 
 const steps = [
-  { title: "Age confirmation", body: "Recovery in Love is for adults 18 and older.", field: "I confirm I am 18 or older" },
+  { title: "Age confirmation", body: "Love in Recovery is for adults 18 and older.", field: "I confirm I am 18 or older" },
   { title: "About you", body: "Start with the basics you want potential matches to know.", field: "First name" },
   { title: "Dating preferences", body: "Choose age range, distance, relationship type, and who you want to meet.", field: "Long-term relationship" },
   { title: "Recovery preferences", body: "Tell us your boundaries and what kind of partner lifestyle works for you.", field: "Sober partner preferred" },
@@ -147,15 +147,15 @@ export default function OnboardingPage() {
     if (recoveryError) { setSaving(false); setNotice(recoveryError.message); return; }
     await supabase.from("mental_health_profiles").upsert({ user_id:user.id, visibility:form.mentalHealthVisibility, updated_at:new Date().toISOString() });
     const ar=score(attachmentQuestions,attachmentAnswers), er=score(enneagramQuestions,enneagramAnswers);
-    await supabase.from("assessment_results").upsert({ user_id:user.id, assessment_type:"attachment", provider:"Recovery in Love original self-reflection", provider_version:"1", result_label:ar[0]?attachmentNames[ar[0][0]]:null, result_json:{ranking:ar.map(([dimension,score])=>({dimension,score}))}, completed_at:new Date().toISOString() },{onConflict:"user_id,assessment_type,provider"});
-    await supabase.from("assessment_results").upsert({ user_id:user.id, assessment_type:"enneagram-style", provider:"Recovery in Love original self-reflection", provider_version:"1", result_label:er[0]?typeNames[er[0][0]]:null, result_json:{ranking:er.map(([dimension,score])=>({dimension,score}))}, completed_at:new Date().toISOString() },{onConflict:"user_id,assessment_type,provider"});
+    await supabase.from("assessment_results").upsert({ user_id:user.id, assessment_type:"attachment", provider:"Love in Recovery original self-reflection", provider_version:"1", result_label:ar[0]?attachmentNames[ar[0][0]]:null, result_json:{ranking:ar.map(([dimension,score])=>({dimension,score}))}, completed_at:new Date().toISOString() },{onConflict:"user_id,assessment_type,provider"});
+    await supabase.from("assessment_results").upsert({ user_id:user.id, assessment_type:"enneagram-style", provider:"Love in Recovery original self-reflection", provider_version:"1", result_label:er[0]?typeNames[er[0][0]]:null, result_json:{ranking:er.map(([dimension,score])=>({dimension,score}))}, completed_at:new Date().toISOString() },{onConflict:"user_id,assessment_type,provider"});
     setSaving(false); router.push("/discover");
   }
 
   return (
     <main className="onboardingShell">
       <section className={step === 6 || step === 7 ? "onboardingPanel assessmentPanel" : "onboardingPanel"}>
-        <Link href="/" className="brand">Recovery in Love</Link>
+        <Link href="/" className="brand">Love in Recovery</Link>
         <div className="progressTrack"><div style={{ width: `${((step + 1) / steps.length) * 100}%` }} /></div>
         <div className="eyebrow">Step {step + 1} of {steps.length}</div>
         <h1>{current.title}</h1>
