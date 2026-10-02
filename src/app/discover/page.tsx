@@ -19,6 +19,7 @@ function ageFromBirthDate(birthDate: string) {
 export default function DiscoverPage() {
   const supabase = useMemo(() => createClient(), []);
   const [profiles, setProfiles] = useState<ProfileRecord[]>([]);
+  const [photos, setPhotos] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState("");
 
@@ -39,7 +40,20 @@ export default function DiscoverPage() {
         .order("created_at", { ascending: false });
 
       if (error) setNotice(error.message);
-      else setProfiles((data || []) as ProfileRecord[]);
+      else {
+        const members = (data || []) as ProfileRecord[];
+        setProfiles(members);
+        if (members.length) {
+          const ids = members.map(p => p.id);
+          const { data: photoRows } = await supabase.from("profile_photos").select("user_id,storage_path,position").in("user_id", ids).order("position");
+          const grouped: Record<string,string[]> = {};
+          (photoRows || []).forEach((row:any) => {
+            const url = supabase.storage.from("profile-photos").getPublicUrl(row.storage_path).data.publicUrl;
+            grouped[row.user_id] = [...(grouped[row.user_id] || []), url];
+          });
+          setPhotos(grouped);
+        }
+      }
       setLoading(false);
     }
     loadProfiles();
@@ -70,6 +84,7 @@ export default function DiscoverPage() {
           {profiles.map(profile => (
             <article className="discoverCard" key={profile.id}>
               <div className="discoverPhoto">
+                {photos[profile.id]?.[0] && <img className="discoverMainImage" src={photos[profile.id][0]} alt={profile.first_name + "'s profile"} />}
                 <div className="photoGradient">
                   <div>
                     <h2>{profile.first_name}, {ageFromBirthDate(profile.birth_date)}</h2>
@@ -84,6 +99,7 @@ export default function DiscoverPage() {
                   {profile.pronouns && <span className="pill">{profile.pronouns}</span>}
                 </div>
                 <p className="profileAbout">{profile.bio || "This member has not added an About Me yet."}</p>
+                {photos[profile.id]?.length > 1 && <div className="discoverPhotoGallery">{photos[profile.id].slice(1).map((url,i)=><img key={url} src={url} alt={profile.first_name + " profile photo " + (i+2)} />)}</div>}
                 <div className="whyBox">
                   <strong>Profile information</strong>
                   <p>This is a real member profile from Recovery in Love. Recovery, assessment, and mental-health details are not exposed here unless their privacy settings allow it.</p>
