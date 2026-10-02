@@ -83,7 +83,7 @@ export default function DiscoverPage() {
         <div className="pageHeader">
           <div>
             <div className="eyebrow">Discover</div>
-            <h1>Meet other Recovery in Love members.</h1>
+            <h1>Meet other Love in Recovery members.</h1>
             <p>Only other member profiles are shown here. Your own profile is excluded from your Discover feed.</p>
           </div>
         </div>
@@ -123,7 +123,7 @@ export default function DiscoverPage() {
                 <div className="discoverActions"><button type="button" className="passButton" disabled={acting===profile.id} onClick={()=>passProfile(profile.id)}><X size={24}/> Pass</button><button type="button" className="likeButton" disabled={acting===profile.id} onClick={()=>likeProfile(profile.id)}><Heart size={24}/> {acting===profile.id?"Sending...":"Like"}</button></div>
                 <div className="whyBox">
                   <strong>Profile information</strong>
-                  <p>This is a real member profile from Recovery in Love. Recovery, assessment, and mental-health details are not exposed here unless their privacy settings allow it.</p>
+                  <p>This is a real member profile from Love in Recovery. Recovery, assessment, and mental-health details are not exposed here unless their privacy settings allow it.</p>
                 </div>
               </div>
             </article>
