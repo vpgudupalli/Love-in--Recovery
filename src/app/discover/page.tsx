@@ -1,8 +1,50 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import AppNav from "@/components/AppNav";
-import ProfileCard from "@/components/ProfileCard";
-import { demoProfiles } from "@/lib/demo-data";
+import { createClient } from "@/lib/supabase/client";
+import type { ProfileRecord } from "@/lib/types";
+
+function ageFromBirthDate(birthDate: string) {
+  const birth = new Date(birthDate + "T00:00:00");
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const beforeBirthday =
+    today.getMonth() < birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate());
+  if (beforeBirthday) age--;
+  return age;
+}
 
 export default function DiscoverPage() {
+  const supabase = useMemo(() => createClient(), []);
+  const [profiles, setProfiles] = useState<ProfileRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    async function loadProfiles() {
+      const { data: auth } = await supabase.auth.getUser();
+      const user = auth.user;
+      if (!user) {
+        setNotice("Please sign in to discover other members.");
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id,first_name,birth_date,gender,pronouns,sexual_orientation,city,region,bio,occupation,education,relationship_goal,created_at,updated_at")
+        .neq("id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) setNotice(error.message);
+      else setProfiles((data || []) as ProfileRecord[]);
+      setLoading(false);
+    }
+    loadProfiles();
+  }, [supabase]);
+
   return (
     <main>
       <AppNav />
@@ -10,12 +52,45 @@ export default function DiscoverPage() {
         <div className="pageHeader">
           <div>
             <div className="eyebrow">Discover</div>
-            <h1>People aligned with your boundaries.</h1>
-            <p>Recommendations are based on preferences and explainable compatibility signals, not clinical predictions.</p>
+            <h1>Meet other Recovery in Love members.</h1>
+            <p>Only other member profiles are shown here. Your own profile is excluded from your Discover feed.</p>
           </div>
         </div>
+
+        {loading && <div className="emptyDiscover">Loading members...</div>}
+        {!loading && notice && <div className="emptyDiscover">{notice}</div>}
+        {!loading && !notice && profiles.length === 0 && (
+          <div className="emptyDiscover">
+            <h2>No other profiles yet</h2>
+            <p>Your account is working. As other people create profiles, they will appear here.</p>
+          </div>
+        )}
+
         <div className="discoverStack">
-          {demoProfiles.map((profile) => <ProfileCard key={profile.id} profile={profile} />)}
+          {profiles.map(profile => (
+            <article className="discoverCard" key={profile.id}>
+              <div className="discoverPhoto">
+                <div className="photoGradient">
+                  <div>
+                    <h2>{profile.first_name}, {ageFromBirthDate(profile.birth_date)}</h2>
+                    <p>{[profile.city, profile.region].filter(Boolean).join(", ") || "Location not shared"}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="discoverBody">
+                <div className="pills">
+                  {profile.relationship_goal && <span className="pill">{profile.relationship_goal}</span>}
+                  {profile.occupation && <span className="pill">{profile.occupation}</span>}
+                  {profile.pronouns && <span className="pill">{profile.pronouns}</span>}
+                </div>
+                <p className="profileAbout">{profile.bio || "This member has not added an About Me yet."}</p>
+                <div className="whyBox">
+                  <strong>Profile information</strong>
+                  <p>This is a real member profile from Recovery in Love. Recovery, assessment, and mental-health details are not exposed here unless their privacy settings allow it.</p>
+                </div>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
     </main>
