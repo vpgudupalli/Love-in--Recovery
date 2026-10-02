@@ -24,6 +24,8 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState("");
   const [acting, setActing] = useState<string | null>(null);
+  const [contexts,setContexts]=useState<Record<string,any>>({});
+  const [contextLoading,setContextLoading]=useState<string|null>(null);
 
   useEffect(() => {
     async function loadProfiles() {
@@ -66,6 +68,11 @@ export default function DiscoverPage() {
     if(error){setNotice(error.message);return;}
     setProfiles(v=>v.filter(p=>p.id!==id));
     setNotice("Passed. This profile will stay out of your Discover feed.");
+  }
+  async function showContext(id:string){
+    if(contexts[id]){setContexts(v=>{const n={...v};delete n[id];return n;});return;}
+    setContextLoading(id);const {data,error}=await supabase.rpc("compatibility_context",{target_user_id:id});setContextLoading(null);
+    if(error){setNotice(error.message);return;}setContexts(v=>({...v,[id]:data||{available:false}}));
   }
   async function likeProfile(id:string){ setActing(id); setNotice(""); const {data,error}=await supabase.rpc("like_profile",{target_user_id:id}); setActing(null); if(error){setNotice(error.message);return;} setProfiles(v=>v.filter(p=>p.id!==id)); if(data?.matched) setNotice("It’s a match! Open Matches to start a conversation."); else setNotice("Like sent."); }
 
@@ -110,6 +117,8 @@ export default function DiscoverPage() {
                   {(profile as ProfileRecord & { assessment_signal?: string | null }).assessment_signal && <span className="pill">Attachment: {(profile as ProfileRecord & { assessment_signal?: string | null }).assessment_signal}</span>}
                 </div>
                 <p className="profileAbout">{profile.bio || "This member has not added an About Me yet."}</p>
+                <button type="button" className="secondaryButton" disabled={contextLoading===profile.id} onClick={()=>showContext(profile.id)}>{contextLoading===profile.id?"Loading...":contexts[profile.id]?"Hide relationship context":"View relationship context"}</button>
+                {contexts[profile.id] && <div className="whyBox"><strong>Relationship context</strong>{contexts[profile.id].available?<><p>Your attachment theme: {contexts[profile.id].your_attachment||"Not completed"}</p><p>Their attachment theme: {contexts[profile.id].their_attachment||"Not shared"}</p><p>Your Enneagram-style theme: {contexts[profile.id].your_enneagram||"Not completed"}</p><p>Their Enneagram-style theme: {contexts[profile.id].their_enneagram||"Not shared"}</p><small>{contexts[profile.id].note||"Self-reflection themes only; not a diagnosis or prediction of relationship success."}</small></>:<p>This member has not chosen to share assessment themes with you.</p>}</div>}
                 {photos[profile.id]?.length > 1 && <div className="discoverPhotoGallery">{photos[profile.id].slice(1).map((url,i)=><img key={url} src={url} alt={profile.first_name + " profile photo " + (i+2)} />)}</div>}
                 <div className="discoverActions"><button type="button" className="passButton" disabled={acting===profile.id} onClick={()=>passProfile(profile.id)}><X size={24}/> Pass</button><button type="button" className="likeButton" disabled={acting===profile.id} onClick={()=>likeProfile(profile.id)}><Heart size={24}/> {acting===profile.id?"Sending...":"Like"}</button></div>
                 <div className="whyBox">
