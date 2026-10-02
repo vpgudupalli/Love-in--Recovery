@@ -86,9 +86,12 @@ export default function ClaimMyPersonPage() {
   async function setStatus(claim: Claim, status: "declined" | "withdrawn") {
     if (!me) return;
     setBusy(true); setNotice("");
-    const { error } = await supabase.from("person_claims").update({
-      status, ...(status === "withdrawn" ? { initiator_consented: false, partner_consented: false } : { partner_consented: false })
-    }).eq("id", claim.id);
+    const { error } = status === "withdrawn"
+      ? await supabase.rpc("withdraw_person_claim", { target_claim_id: claim.id })
+      : await supabase.from("person_claims").update({
+          status: "declined",
+          partner_consented: false
+        }).eq("id", claim.id).eq("partner_id", me).eq("status", "pending");
     setBusy(false);
     if (error) return setNotice(error.message);
     setNotice(status === "declined" ? "Request declined." : "Your consent was withdrawn.");
