@@ -15,5 +15,5 @@ export default function SafetyPage(){
  <label>Tell us what happened<textarea rows={6} value={description} onChange={e=>setDescription(e.target.value)} placeholder="Describe the concern. Avoid unnecessary private information."/></label>
  <button className="primaryButton formButton" disabled={busy} onClick={submit}>{busy?"Submitting...":"Submit private report"}</button>
  {target&&<button className="secondaryButton formButton" disabled={busy} onClick={block}>Block this member</button>}
- </div><div className="notice safetyNotice"><h2>Immediate danger?</h2><p>Recovery in Love reporting is not an emergency service. If there is immediate danger, contact local emergency services.</p></div></section></main>;
+ </div><div className="notice safetyNotice"><h2>Immediate danger?</h2><p>Love in Recovery reporting is not an emergency service. If there is immediate danger, contact local emergency services.</p></div></section></main>;
 }
