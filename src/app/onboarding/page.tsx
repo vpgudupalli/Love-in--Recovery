@@ -147,8 +147,8 @@ export default function OnboardingPage() {
     if (recoveryError) { setSaving(false); setNotice(recoveryError.message); return; }
     await supabase.from("mental_health_profiles").upsert({ user_id:user.id, visibility:form.mentalHealthVisibility, updated_at:new Date().toISOString() });
     const ar=score(attachmentQuestions,attachmentAnswers), er=score(enneagramQuestions,enneagramAnswers);
-    await supabase.from("assessment_results").upsert({ user_id:user.id, assessment_type:"attachment", provider:"Recovery in Love original self-reflection", provider_version:"1", result_label:ar[0]?attachmentNames[ar[0][0]]:null, result_json:{answers:attachmentAnswers,ranking:ar}, completed_at:new Date().toISOString() },{onConflict:"user_id,assessment_type,provider"});
-    await supabase.from("assessment_results").upsert({ user_id:user.id, assessment_type:"enneagram-style", provider:"Recovery in Love original self-reflection", provider_version:"1", result_label:er[0]?typeNames[er[0][0]]:null, result_json:{answers:enneagramAnswers,ranking:er}, completed_at:new Date().toISOString() },{onConflict:"user_id,assessment_type,provider"});
+    await supabase.from("assessment_results").upsert({ user_id:user.id, assessment_type:"attachment", provider:"Recovery in Love original self-reflection", provider_version:"1", result_label:ar[0]?attachmentNames[ar[0][0]]:null, result_json:{ranking:ar.map(([dimension,score])=>({dimension,score}))}, completed_at:new Date().toISOString() },{onConflict:"user_id,assessment_type,provider"});
+    await supabase.from("assessment_results").upsert({ user_id:user.id, assessment_type:"enneagram-style", provider:"Recovery in Love original self-reflection", provider_version:"1", result_label:er[0]?typeNames[er[0][0]]:null, result_json:{ranking:er.map(([dimension,score])=>({dimension,score}))}, completed_at:new Date().toISOString() },{onConflict:"user_id,assessment_type,provider"});
     setSaving(false); router.push("/discover");
   }
 
