@@ -59,3 +59,6 @@
   .claimInfoGrid { grid-template-columns:1fr; }
   .claimActions { flex-direction:column; }
 }
+
+.claimPhoto { display:block; width:100%; max-width:420px; max-height:420px; object-fit:cover; border-radius:18px; margin:14px 0 8px; }
+.claimItem + .claimItem { border-top:1px solid rgba(32,28,25,.1); margin-top:22px; padding-top:22px; }
