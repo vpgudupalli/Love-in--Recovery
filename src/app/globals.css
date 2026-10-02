@@ -71,3 +71,6 @@
 .assessmentBack { margin:18px 0; }
 .standaloneAssessment { max-width:850px; }
 @media (max-width:700px) { .assessmentChoiceGrid { grid-template-columns:1fr; } }
+
+.emptyDiscover { max-width:720px; margin:24px auto; padding:28px; border:1px solid rgba(32,28,25,.12); border-radius:20px; background:#fff; text-align:center; }
+.emptyDiscover h2 { margin-top:0; }
