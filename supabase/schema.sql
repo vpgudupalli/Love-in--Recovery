@@ -1,4 +1,4 @@
--- Recovery in Love initial database foundation
+-- Love in Recovery initial database foundation
 -- Sensitive domains are intentionally separated from public profile data.
 
 create extension if not exists "uuid-ossp";
