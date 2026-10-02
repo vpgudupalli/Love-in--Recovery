@@ -46,7 +46,7 @@ export default function AuthPage() {
   return (
     <main className="onboardingShell">
       <section className="onboardingPanel">
-        <Link href="/" className="brand">Recovery in Love</Link>
+        <Link href="/" className="brand">Love in Recovery</Link>
         <div className="eyebrow">{mode === "signup" ? "Create account" : "Welcome back"}</div>
         <h1>{mode === "signup" ? "Start with a private account." : "Sign in."}</h1>
         <p className="sectionIntro">
