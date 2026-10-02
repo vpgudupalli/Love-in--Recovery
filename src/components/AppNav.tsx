@@ -15,7 +15,7 @@ const items = [
 export default function AppNav() {
   return (
     <nav className="appNav">
-      <Link className="brand" href="/">Recovery in Love</Link>
+      <Link className="brand" href="/">Love in Recovery</Link>
       <div className="appNavLinks">
         {items.map(([href, label]) => (
           <Link key={href} href={href}>{label}</Link>
