@@ -1,4 +1,4 @@
-# Recovery in Love setup
+# Love in Recovery setup
 
 ## 1. Supabase
 
