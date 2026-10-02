@@ -17,13 +17,14 @@ export default function ProfilePage(){
  const [editing,setEditing]=useState(false),[loading,setLoading]=useState(true),[notice,setNotice]=useState("");
  const [photos,setPhotos]=useState<string[]>([]),[uploading,setUploading]=useState(false);
  const [assessmentLatest,setAssessmentLatest]=useState<Record<string,{label:string;date:string}>>({});
+ const [useAssessments,setUseAssessments]=useState(false),[assessmentVisibility,setAssessmentVisibility]=useState("private");
 
  useEffect(()=>{(async()=>{
   const {data:{user}}=await supabase.auth.getUser();
   if(!user){setNotice("Please sign in to view your profile.");setLoading(false);return;}
-  const {data,error}=await supabase.from("profiles").select("first_name,birth_date,city,region,bio,relationship_goal").eq("id",user.id).maybeSingle();
+  const {data,error}=await supabase.from("profiles").select("first_name,birth_date,city,region,bio,relationship_goal,use_assessments_for_matching,assessment_visibility").eq("id",user.id).maybeSingle();
   if(error){setNotice(error.message);setLoading(false);return;}
-  if(data){const v={name:data.first_name||"",birthDate:data.birth_date||"",city:data.city||"",region:data.region||"",bio:data.bio||"",relationshipGoal:data.relationship_goal||"Long-term relationship"};setProfile(v);setDraft(v);}
+  if(data){const v={name:data.first_name||"",birthDate:data.birth_date||"",city:data.city||"",region:data.region||"",bio:data.bio||"",relationshipGoal:data.relationship_goal||"Long-term relationship"};setProfile(v);setDraft(v);setUseAssessments(Boolean(data.use_assessments_for_matching));setAssessmentVisibility(data.assessment_visibility||"private");}
   else setNotice("Complete onboarding to create your profile.");
   const {data:photoRows}=await supabase.from("profile_photos").select("id,storage_path,position").eq("user_id",user.id).order("position");
   if(photoRows){const urls=photoRows.map((p:any)=>supabase.storage.from("profile-photos").getPublicUrl(p.storage_path).data.publicUrl);setPhotos(urls);}
@@ -57,7 +58,7 @@ export default function ProfilePage(){
   const {data:{user}}=await supabase.auth.getUser(); if(!user)return setNotice("Please sign in.");
   if(!draft.name.trim()||!draft.birthDate)return setNotice("First name and date of birth are required.");
   if(Number(age(draft.birthDate))<18)return setNotice("Recovery in Love is for adults 18 and older.");
-  const {error}=await supabase.from("profiles").upsert({id:user.id,first_name:draft.name.trim(),birth_date:draft.birthDate,city:draft.city.trim()||null,region:draft.region.trim()||null,bio:draft.bio.trim()||null,relationship_goal:draft.relationshipGoal,updated_at:new Date().toISOString()});
+  const {error}=await supabase.from("profiles").upsert({id:user.id,first_name:draft.name.trim(),birth_date:draft.birthDate,city:draft.city.trim()||null,region:draft.region.trim()||null,bio:draft.bio.trim()||null,relationship_goal:draft.relationshipGoal,use_assessments_for_matching:useAssessments,assessment_visibility:assessmentVisibility,updated_at:new Date().toISOString()});
   if(error)return setNotice(error.message);
   setProfile(draft);setEditing(false);setNotice("Profile changes saved to your account.");
  }
@@ -73,6 +74,8 @@ export default function ProfilePage(){
    <label>State / region<input value={draft.region} onChange={e=>change("region",e.target.value)}/></label>
    <label className="fullField">About me<textarea rows={4} value={draft.bio} onChange={e=>change("bio",e.target.value)}/></label>
    <label>Relationship goal<select value={draft.relationshipGoal} onChange={e=>change("relationshipGoal",e.target.value)}><option>Long-term relationship</option><option>Dating with intention</option><option>Open to exploring</option><option>Friendship first</option></select></label>
+   <label>Assessment visibility<select value={assessmentVisibility} onChange={e=>setAssessmentVisibility(e.target.value)}><option value="private">Private</option><option value="matches">Matches only</option><option value="everyone">Other members</option></select></label>
+   <label className="claimConsent fullField"><input type="checkbox" checked={useAssessments} onChange={e=>setUseAssessments(e.target.checked)}/><span>Use my assessment themes as optional matching context. Raw answers stay private.</span></label>
   </div><div className="editActions"><button className="secondaryButton" onClick={()=>{setDraft(profile);setEditing(false)}}>Cancel</button><button className="primaryButton" onClick={save}>Save changes</button></div></div>
   :<div className="profilePreview"><div className="profilePreviewPhoto">{photos[0]&&<img src={photos[0]} alt="Main profile photo"/>}</div><div><h2>{profile.name||"Your profile"}{profile.birthDate?`, ${age(profile.birthDate)}`:""}</h2><p>{[profile.city,profile.region].filter(Boolean).join(", ")||"Location not added"} · {profile.relationshipGoal}</p><p>{profile.bio||"Add an About Me so people can get to know you."}</p></div></div>}
  </section></main>;
