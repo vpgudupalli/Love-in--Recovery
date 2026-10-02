@@ -2,13 +2,13 @@ import { Brain, Heart, HeartHandshake, LockKeyhole, ShieldCheck, Sparkles } from
 
 export default function HomePage() {
   return <main className="shell">
-    <nav className="nav"><div className="brand">Recovery in Love</div><div className="navLinks"><a href="#different">Why it's different</a><a href="#compatibility">Compatibility</a><a href="#safety">Safety</a><a className="primaryButton" href="/auth">Join</a></div></nav>
+    <nav className="nav"><div className="brand">Love in Recovery</div><div className="navLinks"><a href="#different">Why it's different</a><a href="#compatibility">Compatibility</a><a href="#safety">Safety</a><a className="primaryButton" href="/auth">Join</a></div></nav>
 
     <section className="hero">
       <div>
         <div className="eyebrow">Dating designed with recovery and mental wellness in mind</div>
         <h1>Dating gets deeper when the app understands more than your photos.</h1>
-        <p>Recovery in Love brings dating, recovery-aware preferences, mental-health privacy, relationship self-reflection, and intentional compatibility into one experience built for adults seeking meaningful connection.</p>
+        <p>Love in Recovery brings dating, recovery-aware preferences, mental-health privacy, relationship self-reflection, and intentional compatibility into one experience built for adults seeking meaningful connection.</p>
         <div className="actions"><a className="primaryButton" href="/auth">Create your profile</a><a className="secondaryButton" href="#different">See what makes it different</a></div>
         <div className="heroProof"><span>18+ community</span><span>SUD-aware</span><span>Mental-health conscious</span><span>Privacy controls</span></div>
       </div>
@@ -16,7 +16,7 @@ export default function HomePage() {
     </section>
 
     <section id="different" className="section">
-      <div className="eyebrow">What makes Recovery in Love different</div><h2>A dating app built around the conversations that actually matter.</h2>
+      <div className="eyebrow">What makes Love in Recovery different</div><h2>A dating app built around the conversations that actually matter.</h2>
       <p className="sectionIntro">Instead of treating recovery or mental health as an afterthought, the experience gives people tools to express boundaries, understand relationship patterns, and decide what they want to share.</p>
       <div className="grid">
         <article className="feature"><Heart size={24}/><h3>Recovery-aware matching</h3><p>Set preferences around sobriety, recovery, substance-use boundaries, partner lifestyle, and relationship goals so compatibility goes beyond surface-level interests.</p></article>
@@ -32,7 +32,7 @@ export default function HomePage() {
 
     <section id="safety" className="section"><div className="eyebrow">Connection without sacrificing safety</div><h2>Private, consent-centered, and recovery-conscious.</h2><p className="sectionIntro">Reporting and blocking tools, controlled disclosure of sensitive information, mutual relationship confirmation, and private evidence workflows are designed to support safer interactions without turning personal recovery or mental-health information into public labels.</p><div className="grid"><article className="feature"><ShieldCheck size={24}/><h3>Safety tools</h3><p>Reporting, blocking, and private moderation workflows are built into the experience.</p></article><article className="feature"><LockKeyhole size={24}/><h3>Sensitive by default</h3><p>Recovery and mental-health details can have tighter visibility than ordinary dating-profile information.</p></article></div></section>
 
-    <section className="section landingCta"><div><div className="eyebrow">Recovery in Love</div><h2>Meet the person. Understand the context. Choose the connection.</h2><p>For adults who want dating to make room for recovery, mental wellness, self-awareness, boundaries, and real relationship intentions.</p><a className="primaryButton" href="/auth">Build my profile</a></div></section>
-    <footer className="footer">Recovery in Love · Adults 18+ · Assessment experiences are self-reflection tools, not medical or psychiatric diagnoses or predictors of relationship success.</footer>
+    <section className="section landingCta"><div><div className="eyebrow">Love in Recovery</div><h2>Meet the person. Understand the context. Choose the connection.</h2><p>For adults who want dating to make room for recovery, mental wellness, self-awareness, boundaries, and real relationship intentions.</p><a className="primaryButton" href="/auth">Build my profile</a></div></section>
+    <footer className="footer">Love in Recovery · Adults 18+ · Assessment experiences are self-reflection tools, not medical or psychiatric diagnoses or predictors of relationship success.</footer>
   </main>;
 }
