@@ -119,6 +119,7 @@ function Assessment({ questions, answers, setAnswers, resultLabel }: {
 export default function OnboardingPage() {
   const [step, setStep] = useState(0);
   const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [stepAnswers, setStepAnswers] = useState<Record<number, string>>({});
   const [attachmentAnswers, setAttachmentAnswers] = useState<Answers>({});
   const [enneagramAnswers, setEnneagramAnswers] = useState<Answers>({});
   const current = steps[step];
@@ -145,7 +146,13 @@ export default function OnboardingPage() {
             {step === 0 ? (
               <label className="checkRow"><input type="checkbox" checked={ageConfirmed} onChange={(e) => setAgeConfirmed(e.target.checked)} /> Yes, I am 18+</label>
             ) : (
-              <input placeholder={current.field} />
+              <input
+                key={step}
+                value={stepAnswers[step] ?? ""}
+                onChange={(e) => setStepAnswers((answers) => ({ ...answers, [step]: e.target.value }))}
+                placeholder={current.field}
+                autoComplete="off"
+              />
             )}
           </div>
         )}
