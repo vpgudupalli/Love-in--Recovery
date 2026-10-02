@@ -74,3 +74,9 @@
 
 .emptyDiscover { max-width:720px; margin:24px auto; padding:28px; border:1px solid rgba(32,28,25,.12); border-radius:20px; background:#fff; text-align:center; }
 .emptyDiscover h2 { margin-top:0; }
+
+.heroProof { display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; }
+.heroProof span { padding:8px 12px; border-radius:999px; border:1px solid rgba(32,28,25,.12); background:rgba(255,255,255,.7); font-size:.88rem; font-weight:700; }
+.landingCta { text-align:center; }
+.landingCta > div { max-width:820px; margin:0 auto; padding:44px 28px; border-radius:28px; background:rgba(255,255,255,.72); border:1px solid rgba(32,28,25,.1); }
+.landingCta .primaryButton { display:inline-flex; margin-top:16px; }
