@@ -5,6 +5,7 @@ const items = [
   ["/matches", "Matches"],
   ["/messages", "Messages"],
   ["/recovery", "Recovery"],
+  ["/claim-my-person", "Claim My Person"],
   ["/profile", "Profile"],
   ["/safety", "Safety"],
 ];
