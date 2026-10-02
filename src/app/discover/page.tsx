@@ -35,11 +35,7 @@ export default function DiscoverPage() {
         return;
       }
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id,first_name,birth_date,gender,pronouns,sexual_orientation,city,region,bio,occupation,education,relationship_goal,created_at,updated_at")
-        .neq("id", user.id)
-        .order("created_at", { ascending: false });
+      const { data, error } = await supabase.rpc("discover_profiles");
 
       if (error) setNotice(error.message);
       else {
@@ -102,6 +98,7 @@ export default function DiscoverPage() {
                   {profile.relationship_goal && <span className="pill">{profile.relationship_goal}</span>}
                   {profile.occupation && <span className="pill">{profile.occupation}</span>}
                   {profile.pronouns && <span className="pill">{profile.pronouns}</span>}
+                  {(profile as ProfileRecord & { assessment_signal?: string | null }).assessment_signal && <span className="pill">Attachment: {(profile as ProfileRecord & { assessment_signal?: string | null }).assessment_signal}</span>}
                 </div>
                 <p className="profileAbout">{profile.bio || "This member has not added an About Me yet."}</p>
                 {photos[profile.id]?.length > 1 && <div className="discoverPhotoGallery">{photos[profile.id].slice(1).map((url,i)=><img key={url} src={url} alt={profile.first_name + " profile photo " + (i+2)} />)}</div>}
