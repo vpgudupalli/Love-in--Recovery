@@ -5,6 +5,7 @@ const items = [
   ["/matches", "Matches"],
   ["/messages", "Messages"],
   ["/recovery", "Recovery"],
+  ["/assessments", "Assessments"],
   ["/claim-my-person", "Claim My Person"],
   ["/profile", "Profile"],
   ["/safety", "Safety"],
