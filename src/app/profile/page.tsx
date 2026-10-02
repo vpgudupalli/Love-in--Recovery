@@ -57,7 +57,7 @@ export default function ProfilePage(){
  async function save(){
   const {data:{user}}=await supabase.auth.getUser(); if(!user)return setNotice("Please sign in.");
   if(!draft.name.trim()||!draft.birthDate)return setNotice("First name and date of birth are required.");
-  if(Number(age(draft.birthDate))<18)return setNotice("Recovery in Love is for adults 18 and older.");
+  if(Number(age(draft.birthDate))<18)return setNotice("Love in Recovery is for adults 18 and older.");
   const {error}=await supabase.from("profiles").upsert({id:user.id,first_name:draft.name.trim(),birth_date:draft.birthDate,city:draft.city.trim()||null,region:draft.region.trim()||null,bio:draft.bio.trim()||null,relationship_goal:draft.relationshipGoal,use_assessments_for_matching:useAssessments,assessment_visibility:assessmentVisibility,updated_at:new Date().toISOString()});
   if(error)return setNotice(error.message);
   setProfile(draft);setEditing(false);setNotice("Profile changes saved to your account.");
