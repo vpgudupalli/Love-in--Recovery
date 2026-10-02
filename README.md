@@ -1,6 +1,6 @@
-# Recovery in Love
+# Love in Recovery
 
-Recovery in Love is an adults-only dating platform designed for people who want relationships compatible with their recovery, lifestyle, and relationship goals.
+Love in Recovery is an adults-only dating platform designed for people who want relationships compatible with their recovery, lifestyle, and relationship goals.
 
 ## Core product areas
 - Account creation and onboarding
