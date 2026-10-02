@@ -113,3 +113,9 @@
 .assessmentSaveNotice{font-weight:700}
 .compatibilityBand .pill,.compatibilityBand .pills span,.compatibilityBand span.pill{color:#2b2724!important}
 @media(max-width:700px){.profileAssessmentHeader{display:block}.profileAssessmentHeader .secondaryButton{display:inline-block;margin-top:12px}.profileAssessmentGrid{grid-template-columns:1fr}}
+
+.discoverActions{display:flex;gap:12px;margin:20px 0}
+.discoverActions button{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 18px;border-radius:999px;font-weight:800;cursor:pointer}
+.passButton{background:#fff;border:1px solid var(--border);color:#2b2724}
+.likeButton{background:#2b2724;border:1px solid #2b2724;color:#fff}
+.likeButton:disabled{opacity:.55;cursor:wait}
