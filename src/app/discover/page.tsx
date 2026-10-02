@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import AppNav from "@/components/AppNav";
 import { createClient } from "@/lib/supabase/client";
 import type { ProfileRecord } from "@/lib/types";
+import { Heart, X } from "lucide-react";
 
 function ageFromBirthDate(birthDate: string) {
   const birth = new Date(birthDate + "T00:00:00");
@@ -22,6 +23,7 @@ export default function DiscoverPage() {
   const [photos, setPhotos] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState("");
+  const [acting, setActing] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadProfiles() {
@@ -58,6 +60,9 @@ export default function DiscoverPage() {
     }
     loadProfiles();
   }, [supabase]);
+
+  async function passProfile(id:string){ setProfiles(v=>v.filter(p=>p.id!==id)); }
+  async function likeProfile(id:string){ setActing(id); setNotice(""); const {data,error}=await supabase.rpc("like_profile",{target_user_id:id}); setActing(null); if(error){setNotice(error.message);return;} setProfiles(v=>v.filter(p=>p.id!==id)); if(data?.matched) setNotice("It’s a match! Open Matches to start a conversation."); else setNotice("Like sent."); }
 
   return (
     <main>
@@ -100,6 +105,7 @@ export default function DiscoverPage() {
                 </div>
                 <p className="profileAbout">{profile.bio || "This member has not added an About Me yet."}</p>
                 {photos[profile.id]?.length > 1 && <div className="discoverPhotoGallery">{photos[profile.id].slice(1).map((url,i)=><img key={url} src={url} alt={profile.first_name + " profile photo " + (i+2)} />)}</div>}
+                <div className="discoverActions"><button type="button" className="passButton" onClick={()=>passProfile(profile.id)}><X size={24}/> Pass</button><button type="button" className="likeButton" disabled={acting===profile.id} onClick={()=>likeProfile(profile.id)}><Heart size={24}/> {acting===profile.id?"Sending...":"Like"}</button></div>
                 <div className="whyBox">
                   <strong>Profile information</strong>
                   <p>This is a real member profile from Recovery in Love. Recovery, assessment, and mental-health details are not exposed here unless their privacy settings allow it.</p>
