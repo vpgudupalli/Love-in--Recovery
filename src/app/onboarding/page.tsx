@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
@@ -119,7 +119,7 @@ function Assessment({ questions, answers, setAnswers, resultLabel }: {
 }
 
 export default function OnboardingPage() {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(0);\n  const [checkingAccount, setCheckingAccount] = useState(true);
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [ageConfirmed, setAgeConfirmed] = useState(false);
@@ -128,6 +128,20 @@ export default function OnboardingPage() {
   const [notice, setNotice] = useState("");
   const [attachmentAnswers, setAttachmentAnswers] = useState<Answers>({});
   const [enneagramAnswers, setEnneagramAnswers] = useState<Answers>({});
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!active) return;
+      if (!user) { router.replace("/auth"); return; }
+      const { data: profile, error } = await supabase.from("profiles").select("first_name,birth_date").eq("id",user.id).maybeSingle();
+      if (!active) return;
+      if (error) { setNotice("Unable to load your account: " + error.message); setCheckingAccount(false); return; }
+      if (profile?.first_name && profile?.birth_date) { router.replace("/discover"); return; }
+      setCheckingAccount(false);
+    })();
+    return () => { active = false; };
+  }, [supabase,router]);
   const current = steps[step];
   const attachmentComplete = Object.keys(attachmentAnswers).length === attachmentQuestions.length;
   const enneagramComplete = Object.keys(enneagramAnswers).length === enneagramQuestions.length;
