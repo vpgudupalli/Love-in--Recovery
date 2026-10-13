@@ -1,16 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AuthPage() {
-  const supabase = createClient();
-  const [mode, setMode] = useState<"signin" | "signup">("signup");
+  const supabase = useMemo(() => createClient(), []);
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    async function redirectIfSignedIn() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!active || !user) return;
+      const { data: profile } = await supabase.from("profiles").select("first_name,birth_date").eq("id",user.id).maybeSingle();
+      if (active) window.location.replace(profile?.first_name && profile?.birth_date ? "/discover" : "/onboarding");
+    }
+    void redirectIfSignedIn();
+    return () => { active = false; };
+  }, [supabase]);
+
+  async function resetPassword() {
+    if (!email.trim()) { setMessage("Enter your email address first."); return; }
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: window.location.origin + "/auth/reset-password",
+    });
+    setBusy(false);
+    setMessage(error ? error.message : "If an account exists for this email, a password reset link has been sent.");
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -24,7 +46,7 @@ export default function AuthPage() {
         options: {
           emailRedirectTo:
             typeof window !== "undefined"
-              ? `${window.location.origin}/onboarding`
+              ? `${window.location.origin}/auth`
               : undefined,
         },
       });
@@ -35,9 +57,17 @@ export default function AuthPage() {
           : "Account created. Check your email if confirmation is enabled."
       );
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       setMessage(error ? error.message : "Signed in successfully.");
-      if (!error) window.location.href = "/discover";
+      if (!error) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile, error: profileError } = await supabase.from("profiles").select("first_name,birth_date").eq("id",user.id).maybeSingle();
+          if (profileError) { setMessage("Signed in, but your profile could not be loaded: " + profileError.message); setBusy(false); return; }
+          window.location.replace(profile?.first_name && profile?.birth_date ? "/discover" : "/onboarding");
+          return;
+        }
+      }
     }
 
     setBusy(false);
@@ -80,11 +110,11 @@ export default function AuthPage() {
           </button>
 
           {message && <p className="statusText">{message}</p>}
-        </form>
+          {mode === "signin" && <button type="button" className="secondaryButton authSwitch" disabled={busy} onClick={resetPassword}>Forgot password?</button>}\n        </form>
 
         <button
           className="secondaryButton authSwitch"
-          onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
+          onClick={() => { setMessage(""); setMode(mode === "signup" ? "signin" : "signup"); }}
         >
           {mode === "signup" ? "Already have an account? Sign in" : "Need an account? Sign up"}
         </button>
