@@ -51,11 +51,13 @@ export default function AuthPage() {
         },
       });
 
-      setMessage(
-        error
-          ? error.message
-          : "Account created. Check your email if confirmation is enabled."
-      );
+      if (error) setMessage(error.message);
+      else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) { window.location.replace("/onboarding"); return; }
+        setMessage("Check your email to confirm your account, then sign in.");
+        setMode("signin");
+      }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       setMessage(error ? error.message : "Signed in successfully.");
